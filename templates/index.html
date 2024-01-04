@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Forms</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script defer src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script defer src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>    
+</head>
+    <body>
+
+        <div id="app">
+            <form @submit.prevent="submitForm">
+                <div v-for="(field, index) in fields" :key="field.fieldId">
+                    <label>Field $[[ index + 1 ]]:</label>
+                    <input v-if="field.type === 'text'" type="text" :name="'field_' + field.fieldId" />
+                    <input v-else-if="field.type === 'image'" type="file" :name="'field_' + field.fieldId" accept="image/*" />
+                    <input v-else-if="field.type === 'video'" type="file" :name="'field_' + field.fieldId" accept="video/*" />
+                    <button @click="removeField(field.fieldId)">Remove</button>
+                </div>
+                <button type="button" @click="addField">Add Field</button>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+        <script src="https://unpkg.com/petite-vue"></script>
+        <script>
+            PetiteVue.createApp({
+                fields: [],
+                fieldCounter: 0, // To generate unique fieldIds
+                addField() {
+                    this.fieldCounter++;
+                    this.fields.push({ fieldId: this.fieldCounter, type: 'text' });
+                },
+                removeField(fieldId) {
+                    const indexToRemove = this.fields.findIndex(field => field.fieldId === fieldId);
+                    if (indexToRemove !== -1) {
+                        this.fields.splice(indexToRemove, 1);
+                    }
+                },
+                submitForm() {
+                    const formData = new FormData();
+                    this.fields.forEach(field => {
+                        const input = document.querySelector(`[name='field_${field.fieldId}']`);
+                        formData.append(`field_${field.fieldId}`, input.files[0]);
+                    });
+                    console.log('Form data:', formData);
+                },
+                // },
+                $delimiters: ['$[[', ']]']
+            }).mount('#app');
+        </script>
+    
+    </body>
+</html>
