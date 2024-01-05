@@ -13,12 +13,17 @@
         <div id="app">
             <form @submit.prevent="submitForm">
                 <div v-for="(field, index) in fields" :key="field.fieldId">
-                    <label>Field $[[ index + 1 ]]:</label>
-                    <input v-if="field.type === 'text'" type="text" :name="'field_' + field.fieldId" />
-                    <input v-else-if="field.type === 'image'" type="file" :name="'field_' + field.fieldId" accept="image/*" />
-                    <input v-else-if="field.type === 'video'" type="file" :name="'field_' + field.fieldId" accept="video/*" />
+                    <label>$[[ field.fieldName ]]:</label>
+                    <input v-if="field.type === 'number'" type="number" :name="'field_' + field.fieldId" v-model = "field.typeName" />
+                    <input v-else-if="field.type === 'text'" type="text" :name="'field_' + field.fieldId" v-model = "field.typeName"/>
+                    <input v-else-if="field.type === 'image'" type="file" :name="'field_' + field.fieldId" accept="image/*" v-model = "field.typeName"/>
+                    <input v-else-if="field.type === 'video'" type="file" :name="'field_' + field.fieldId" accept="video/*" v-model = "field.typeName" />
                     <button @click="removeField(field.fieldId)">Remove</button>
                 </div>
+                <input type="text" class="fieldName" v-model="fieldName">
+                <select v-model="fieldType">
+                    <option v-for="type in fieldTypes" :value="type">$[[ type ]]</option>
+                </select>
                 <button type="button" @click="addField">Add Field</button>
                 <button type="submit">Submit</button>
             </form>
@@ -28,9 +33,21 @@
             PetiteVue.createApp({
                 fields: [],
                 fieldCounter: 0, // To generate unique fieldIds
+                fieldName: '',
+                fieldTypes: ['number', 'text', 'image', 'video'],
+                typeName: '',
+                fieldType: '',
                 addField() {
                     this.fieldCounter++;
-                    this.fields.push({ fieldId: this.fieldCounter, type: 'text' });
+                    this.fields.push({
+                        fieldId: this.fieldCounter,
+                        fieldName: this.fieldName,
+                        fieldVal: '',
+                        type: this.fieldType,
+                        typeName: ''
+                    });
+                    this.fieldName = '';
+                    this.fieldType = '';
                 },
                 removeField(fieldId) {
                     const indexToRemove = this.fields.findIndex(field => field.fieldId === fieldId);
@@ -39,12 +56,7 @@
                     }
                 },
                 submitForm() {
-                    const formData = new FormData();
-                    this.fields.forEach(field => {
-                        const input = document.querySelector(`[name='field_${field.fieldId}']`);
-                        formData.append(`field_${field.fieldId}`, input.files[0]);
-                    });
-                    console.log('Form data:', formData);
+                    console.log(this.fields);
                 },
                 // },
                 $delimiters: ['$[[', ']]']
